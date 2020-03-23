@@ -5,3 +5,19 @@ Mit git clone Projekt auschecken.
 Projekt in PHPStorm öffnen
 
 Strg+Shift+A --> join Workspace (Floobits) by URL
+
+## Running Code
+
+To run code from a php file, execute: `bin/run <filename>`
+(If there is an error about permissions, run `chmod +x bin/run` and try again)
+
+Example: bin/run src/foo.php
+
+## Running Tests
+
+To run the unit tests, execute: `bin/tests`. This will execute all unit tests, configured in the config file (phpunit.xml)
+If you want to run a singe test case just append the filename to the command.
+
+Example: `bin/tests tests/FizzBuzzTest.php`
+
+You can pass every parameter to `bin/tests` which you can pass to phpunit
