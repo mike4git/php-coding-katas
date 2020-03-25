@@ -40,14 +40,7 @@ class FourInARowTest extends TestCase {
      */
     public function fullColumn(): void
     {
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-
+        $this->makeMultipleDraws(1,1,1,1,1,1,1);
         self::assertSame("Spieler 1 ist an der Reihe.", $this->game->status());
     }
 
@@ -56,15 +49,7 @@ class FourInARowTest extends TestCase {
      */
     public function multipleColumns(): void
     {
-        $this->game->makeDraw(1);
-        // up to 7 columns
-        $this->game->makeDraw(rand(2, 7));
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(1);
-
+        $this->makeMultipleDraws(1, rand(2,7), 1,1,1,1,1);
         self::assertSame("Spieler 2 ist an der Reihe.", $this->game->status());
     }
 
@@ -73,15 +58,15 @@ class FourInARowTest extends TestCase {
      */
     public function verticalWin(): void
     {
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(2);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(2);
-        $this->game->makeDraw(1);
-        $this->game->makeDraw(2);
-        $this->game->makeDraw(1);
+        $this->makeMultipleDraws(1,2,1,2,1,2,1);
         self::assertSame("Spieler 1 hat gewonnen.", $this->game->status());
     }
 
+    private function makeMultipleDraws(...$cols) : void
+    {
+        for ($i = 0; $i < count($cols); $i++) {
+            $this->game->makeDraw($cols[$i]);
+        }
+    }
 
 }

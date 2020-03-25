@@ -25,13 +25,7 @@ class FourInARow
         if ($this->isInsideBoard($currentCol)) {
             $this->executeDraw($currentCol);
             // already victory
-            $rowIndex = count($this->boardState[$currentCol]) - 1;
-            $countEqualChips = 0;
-            for ($i = $rowIndex; $i >= 0 && ($this->boardState[$currentCol][$i] === $this->playerIndex); $i--) {
-                    $countEqualChips++;
-            }
-
-            $this->victory = ($countEqualChips >= 4);
+            $this->victory = $this->checkVerticalVictory($currentCol);
 
             if (!$this->victory) {
                 $this->changePlayer();
@@ -58,5 +52,29 @@ class FourInARow
     private function executeDraw(int $column): void
     {
         $this->boardState[$column][] = $this->playerIndex;
+    }
+
+    /**
+     * @param int $currentCol
+     */
+    private function checkVerticalVictory(int $currentCol): bool
+    {
+        $currentRow = count($this->boardState[$currentCol]) - 1;
+        $countSameChips = 0;
+        for ($i = $currentRow; $i >= 0 && $this->isChipOfCurrentPlayer($currentCol, $i); $i--) {
+            $countSameChips++;
+        }
+
+        return $countSameChips >= 4;
+    }
+
+    /**
+     * @param int $currentCol
+     * @param int $i
+     * @return bool
+     */
+    private function isChipOfCurrentPlayer(int $currentCol, int $i): bool
+    {
+        return ($this->boardState[$currentCol][$i] === $this->playerIndex);
     }
 }
