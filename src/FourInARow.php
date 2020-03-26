@@ -75,13 +75,7 @@ class FourInARow
      */
     private function checkVerticalVictory(int $currentCol, int $currentRow): bool
     {
-        $countSameChips = 0;
-        // guck nach unten
-        for ($i = $currentRow; $this->isInsideBoard($currentCol, $i) && $this->isChipOfCurrentPlayer($currentCol, $i); $i--) {
-            $countSameChips++;
-        }
-
-        return $countSameChips >= 4;
+        return $this->checkVictoryWithDirection($currentCol, $currentRow, 0,-1);
     }
 
     /**
@@ -104,24 +98,21 @@ class FourInARow
 
     private function checkBackSlashVictory(int $currentCol, int $currentRow): bool
     {
-        $countSameChips = 0;
-        for ($i = $currentRow, $j= $currentCol; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i--,$j++) {
-            $countSameChips++;
-        }
-        for ($i = $currentRow+1, $j= $currentCol-1; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i++,$j--) {
-            $countSameChips++;
-        }
-
-        return $countSameChips >= 4;
+        return $this->checkVictoryWithDirection($currentCol,$currentRow,-1,1);
     }
 
     private function checkSlashVictory(int $currentCol, int $currentRow): bool
     {
+        return $this->checkVictoryWithDirection($currentCol,$currentRow,1,1);
+    }
+
+    private function checkVictoryWithDirection(int $currentCol, int $currentRow, int $deltaCol, int $deltaRow): bool
+    {
         $countSameChips = 0;
-        for ($i = $currentRow, $j= $currentCol; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i++,$j++) {
+        for ($i = $currentRow, $j= $currentCol; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i= $i+$deltaRow,$j=$j+$deltaCol) {
             $countSameChips++;
         }
-        for ($i = $currentRow-1, $j= $currentCol-1; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i--,$j--) {
+        for ($i = $currentRow-$deltaRow, $j= $currentCol-$deltaCol; $this->isInsideBoard($j, $i) && $this->isChipOfCurrentPlayer($j, $i); $i= $i-$deltaRow,$j=$j-$deltaCol) {
             $countSameChips++;
         }
 
