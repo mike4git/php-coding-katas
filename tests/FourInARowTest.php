@@ -90,9 +90,21 @@ class FourInARowTest extends TestCase
         self::assertSame("Spieler 1 hat gewonnen.", $this->game->status());
     }
 
+    /**
+     * @test
+     */
+    public function drawGame(): void
+    {
+        $this->makeMultipleDraws(1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 3, 4, 3, 4, 3, 4, 4,
+            3, 4, 3, 4, 3, 5, 6, 5, 6, 5, 6, 6, 5, 6, 5, 6, 5, 7, 7, 7, 7, 7,
+            7);
+        self::assertSame("Das Spiel endet Unentschieden.", $this->game->status());
+    }
+
     private function makeMultipleDraws(...$cols): void
     {
-        for ($i = 0; $i < count($cols); $i++) {
+        $numberOfColumns = count($cols);
+        for ($i = 0; $i < $numberOfColumns; $i++) {
             $this->game->makeDraw($cols[$i]);
         }
     }

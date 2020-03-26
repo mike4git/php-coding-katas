@@ -5,16 +5,25 @@ namespace Kata;
 
 class FourInARow
 {
+    const NUMBER_OF_COLUMNS = 7;
+    const NUMBER_OF_ROWS = 6;
     private $playerIndex = 1;
     private $boardState = [];
 
     private $victory = false;
+    private $tie = false;
+
+    private $outputs = [
+        [0, "Das Spiel endet Unentschieden."]
+    ];
+
+    private $numberOfDraws = 0;
 
     public function __construct()
     {
-        for($i = 0; $i < 7;$i++) {
+        for($i = 0; $i < self::NUMBER_OF_COLUMNS; $i++) {
             $this->boardState[] = [];
-            for($j=0; $j<6;$j++) {
+            for($j=0; $j< self::NUMBER_OF_ROWS; $j++) {
                 $this->boardState[$i][] = 0;
             }
         }
@@ -22,6 +31,9 @@ class FourInARow
 
     public function status(): string
     {
+        if ($this->tie) {
+            return $this->outputs[0][1];
+        }
         if ($this->victory) {
             return "Spieler " . $this->playerIndex . " hat gewonnen.";
         }
@@ -32,32 +44,18 @@ class FourInARow
     public function makeDraw(int $column): void
     {
         $currentCol = $column - 1;
-        $currentRow = 0;
-        while($this->isInsideBoard($currentCol, $currentRow) && $this->isFieldOccupied($currentCol, $currentRow)) {
-            $currentRow++;
-        }
+        $currentRow = $this->findCurrentRow($currentCol);
 
         if ($this->isInsideBoard($currentCol, $currentRow)) {
             $this->executeDraw($currentCol, $currentRow);
-            // already victory
-            $this->victory = $this->checkVerticalVictory($currentCol, $currentRow)
-                || $this-> checkHorizontalVictory($currentCol, $currentRow)
-                || $this-> checkBackSlashVictory($currentCol, $currentRow)
-                || $this-> checkSlashVictory($currentCol, $currentRow);
 
-            if (!$this->victory) {
+            $this->victory = $this->checkVictory($currentCol, $currentRow);
+            $this->tie = $this->checkTiedGame();
+
+            if ($this->hasGameNotFinished()) {
                 $this->changePlayer();
             }
         }
-    }
-
-    /**
-     * @param int $column
-     * @return bool
-     */
-    private function isInsideBoard(int $column, int $row): bool
-    {
-       return $column >= 0 && $column < 7 && $row >= 0 && $row < 6;
     }
 
     private function changePlayer(): void
@@ -68,32 +66,49 @@ class FourInARow
     private function executeDraw(int $column, int $row): void
     {
         $this->boardState[$column][$row] = $this->playerIndex;
+        $this->numberOfDraws++;
     }
 
-    /**
-     * @param int $currentCol
-     */
+    private function isChipOfCurrentPlayer(int $col, int $row): bool
+    {
+        return ($this->boardState[$col][$row] === $this->playerIndex);
+    }
+
+    private function isInsideBoard(int $column, int $row): bool
+    {
+       return $column >= 0 && $column < self::NUMBER_OF_COLUMNS && $row >= 0 && $row < self::NUMBER_OF_ROWS;
+    }
+
+    private function isFieldOccupied(int $currentCol, int $currentRow): bool
+    {
+        return $this->boardState[$currentCol][$currentRow] != 0;
+    }
+
+    private function findCurrentRow(int $currentCol): int
+    {
+        $currentRow = 0;
+        while ($this->isInsideBoard($currentCol, $currentRow) && $this->isFieldOccupied($currentCol, $currentRow)) {
+            $currentRow++;
+        }
+        return $currentRow;
+    }
+
+    private function checkVictory(int $currentCol, int $currentRow): bool
+    {
+        return $this->checkVerticalVictory($currentCol, $currentRow)
+            || $this->checkHorizontalVictory($currentCol, $currentRow)
+            || $this->checkBackSlashVictory($currentCol, $currentRow)
+            || $this->checkSlashVictory($currentCol, $currentRow);
+    }
+
     private function checkVerticalVictory(int $currentCol, int $currentRow): bool
     {
-        return $this->checkVictoryWithDirection($currentCol, $currentRow, 0,-1);
+        return $this->checkVictoryWithDirection($currentCol, $currentRow, 0,1);
     }
 
-    /**
-     * @param int $currentCol
-     */
     private function checkHorizontalVictory(int $currentCol, int $currentRow): bool
     {
-        $countSameChips = 0;
-        // guck nach links
-        for ($i = $currentCol; $this->isInsideBoard($i, $currentRow) && $this->isChipOfCurrentPlayer($i, $currentRow); $i--) {
-            $countSameChips++;
-        }
-        // guck nach rechts
-        for ($i = $currentCol+1; $this->isInsideBoard($i, $currentRow) && $this->isChipOfCurrentPlayer($i, $currentRow); $i++) {
-            $countSameChips++;
-        }
-
-        return $countSameChips >= 4;
+        return $this->checkVictoryWithDirection($currentCol, $currentRow, 1,0);
     }
 
     private function checkBackSlashVictory(int $currentCol, int $currentRow): bool
@@ -119,25 +134,14 @@ class FourInARow
         return $countSameChips >= 4;
     }
 
-
-
-    /**
-     * @param int $col
-     * @param int $row
-     * @return bool
-     */
-    private function isChipOfCurrentPlayer(int $col, int $row): bool
+    private function checkTiedGame(): bool
     {
-        return ($this->boardState[$col][$row] === $this->playerIndex);
+        return $this->numberOfDraws >= self::NUMBER_OF_ROWS * self::NUMBER_OF_COLUMNS;
     }
 
-    /**
-     * @param int $currentCol
-     * @param int $currentRow
-     * @return bool
-     */
-    private function isFieldOccupied(int $currentCol, int $currentRow): bool
+    private function hasGameNotFinished(): bool
     {
-        return $this->boardState[$currentCol][$currentRow] != 0;
+        return !$this->victory && !$this->tie;
     }
+
 }
