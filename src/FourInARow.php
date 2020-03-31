@@ -81,7 +81,7 @@ class FourInARow
 
     private function isFieldOccupied(int $currentCol, int $currentRow): bool
     {
-        return $this->boardState[$currentCol][$currentRow] != 0;
+        return $this->boardState[$currentCol][$currentRow] !== 0;
     }
 
     private function findCurrentRow(int $currentCol): int
@@ -136,7 +136,7 @@ class FourInARow
 
     private function checkTiedGame(): bool
     {
-        return $this->numberOfDraws >= self::NUMBER_OF_ROWS * self::NUMBER_OF_COLUMNS;
+        return $this->numberOfDraws === self::NUMBER_OF_ROWS * self::NUMBER_OF_COLUMNS;
     }
 
     private function hasGameNotFinished(): bool
