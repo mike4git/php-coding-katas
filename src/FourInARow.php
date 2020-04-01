@@ -81,7 +81,7 @@ class FourInARow
 
     private function isFieldOccupied(int $currentCol, int $currentRow): bool
     {
-        return $this->boardState[$currentCol][$currentRow] != 0;
+        return $this->boardState[$currentCol][$currentRow] !== 0;
     }
 
     private function findCurrentRow(int $currentCol): int
