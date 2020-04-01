@@ -136,7 +136,7 @@ class FourInARow
 
     private function checkTiedGame(): bool
     {
-        return $this->numberOfDraws >= self::NUMBER_OF_ROWS * self::NUMBER_OF_COLUMNS;
+        return $this->numberOfDraws === self::NUMBER_OF_ROWS * self::NUMBER_OF_COLUMNS;
     }
 
     private function hasGameNotFinished(): bool
