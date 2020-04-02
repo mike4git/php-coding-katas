@@ -21,6 +21,8 @@ class ArabicToRomanConverterTest extends TestCase
      */
     public function convertOnInput(string $expected, int $number)
     {
+        self::markTestSkipped('This is our acceptance test for the end.');
+
         self::assertSame($expected, $this->converter->convert($number));
     }
 
