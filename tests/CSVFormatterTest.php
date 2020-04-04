@@ -14,14 +14,47 @@ class CSVFormatterTest extends TestCase
 
     public function sampleTestData(): iterable
     {
-        yield['balala', 'balala'];
-        yield['Bla|Bla', 'Bla;Bla'];
-        yield['Bla|Bla|Bla', 'Bla;Bla;Bla'];
-        yield['Bla|Bla|Bla|\n', 'Bla;Bla;Bla\n'];
-        yield['Bla|\n---+\nABC|\n', 'Bla\nABC\n'];
-        yield['Bla|Bla|Bla|\n---+---+---+\nABC|ABC|ABC|\n', 'Bla;Bla;Bla\nABC;ABC;ABC\n'];
-        yield['HR1|HR1|\n---+---+\nDR2|DR2|\nDR3|DR3|\n', 'HR1;HR1\nDR2;DR2\nDR3;DR3\n'];
-        yield['AB|ABC|\n--+---+\nAB|ABC|\n', 'AB;ABC\nAB;ABC\n'];
+        yield['Einfacher Text', 'Einfacher Text'];
+        yield['Spalte 1|Spalte 2', 'Spalte 1;Spalte 2'];
+        yield['Spalte 1|Spalte 2|Spalte 3', 'Spalte 1;Spalte 2;Spalte 3'];
+        yield['Spalte 1|Spalte 2|Spalte 3|\n', 'Spalte 1;Spalte 2;Spalte 3\n'];
+
+        yield[
+            'Zeile 1|\n' .
+            '-------+\n' .
+            'Zeile 2|',
+
+            'Zeile 1\n' .
+            'Zeile 2'
+        ];
+
+        yield[
+            'Zeile 1      |\n' .
+            '-------------+\n' .
+            'Lange Zeile 2|',
+
+            'Zeile 1\n' .
+            'Lange Zeile 2'
+        ];
+
+        yield[
+            'Col1|Col2|Col3|\n' .
+            '----+----+----+\n' .
+            'ABC |ABC |ABC |',
+
+            'Col1;Col2;Col3\n' .
+            'ABC;ABC;ABC'
+        ];
+        yield[
+            'HR1|HR1|\n' .
+            '---+---+\n' .
+            'DR2|DR2|\n' .
+            'DR3|DR3|\n',
+
+            'HR1;HR1\n' .
+            'DR2;DR2\n' .
+            'DR3;DR3\n'
+        ];
     }
 
     /**
@@ -29,15 +62,16 @@ class CSVFormatterTest extends TestCase
      */
     public function showTable(): void
     {
-        self::markTestSkipped('This is our acceptance test for the end.');
-        $csvData = 'Name;Strasse;Ort;Alter\nPeter Pan;Am Hang 5;12345 Einsam;42' .
-            '\nMaria Schmitz;Kölner Straße 45;50123 Köln;43\nPaul Meier;Münchener Weg 1;87654 München;65';
+        //self::markTestSkipped('This is our acceptance test for the end.');
+        $csvData = 'Name;Strasse;Ort;Alter\nPeter Pan;Am Hang 5;12345 Einsam;42\n' .
+                   'Maria Schmitz;Kölner Straße 45;50123 Köln;43\n' .
+                   'Paul Meier;Münchener Weg 1;87654 München;65';
 
         $result = 'Name         |Strasse         |Ort          |Alter|\n' .
                   '-------------+----------------+-------------+-----+\n' .
                   'Peter Pan    |Am Hang 5       |12345 Einsam |42   |\n' .
                   'Maria Schmitz|Kölner Straße 45|50123 Köln   |43   |\n' .
-                  'Paul Meier   |Münchener Weg 1 |87654 München|65   |\n';
+                  'Paul Meier   |Münchener Weg 1 |87654 München|65   |';
 
         self::assertSame($result, $this->csvFormatter->showTable($csvData));
     }
