@@ -14,7 +14,6 @@ class FourInARowTest extends TestCase
 
     protected function setUp(): void
     {
-        self::markTestSkipped('Not necessary');
         $this->game = new FourInARow();
     }
 
