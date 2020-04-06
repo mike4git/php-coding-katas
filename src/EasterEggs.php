@@ -4,6 +4,8 @@
 namespace Kata;
 
 
+use Kata\Exception\NotInOurGardenException;
+
 class EasterEggs
 {
     public function __construct(string $filename)
@@ -13,7 +15,7 @@ class EasterEggs
     /**
      * @param int $row
      * @param int $column
-     * @throws
+     * @throws NotInOurGardenException
      */
     public function whereAreEasterEggs(int $row, int $column) : string
     {
