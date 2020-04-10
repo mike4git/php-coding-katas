@@ -1,168 +1,159 @@
-<?php declare(strict_types=1);
+<?php
+
 
 namespace Kata;
+
 
 use Kata\Exception\NotInOurGardenException;
 
 class EasterEggs
 {
-    private $garden;
+    const UP = -1;
+    const DOWN = 1;
+    const RIGHT = 1;
+    const LEFT = -1;
+    private array $garden;
 
-    private $eggCount;
+    private int $eggsCount;
 
-    /**
-     * @var int
-     */
-    private $eggsFound;
-
-    /**
-     * @var int
-     */
-    private $steps;
+    private int $eggsFound = 0;
+    private int $steps = 0;
 
     public function __construct(string $filename)
     {
-        $fileContent = $this->hideEggsInGarden($filename);
-        $this->countEggs($fileContent);
-
-        $this->eggsFound = 0;
-        $this->steps = 0;
-
+        $content = file_get_contents($filename);
+        $content = str_replace("\r", '', $content);
+        $this->eggsCount = substr_count($content, '*');
+        $gardenRows = explode(PHP_EOL, $content);
+        foreach ($gardenRows as $row) {
+            $this->garden[] = explode(' ', $row);
+        }
     }
 
     /**
-     * @param int $row
-     * @param int $column
-     * @return string
      * @throws NotInOurGardenException
      */
     public function whereAreEasterEggs(int $row, int $column): string
     {
-        $currentRow = $this->calibrateUserInput($row);
-        $currentCol = $this->calibrateUserInput($column);
+        list($currentCol, $currentRow) = $this->validateUserInput($row, $column);
 
-        $this->incrementSteps();
+        $this->countOneMoreStep();
 
-        $result = '';
+        if ($this->eggFound($currentRow, $currentCol)) {
 
-        if ($this->noEggFound($currentRow, $currentCol)) {
-            $eggsFoundAround = $this->lookAround($currentCol, $currentRow, 0);
-            $result = 'Es sind ' . $eggsFoundAround . ' Eier in Deiner Nähe';
+            $this->countOneMoreEggFound();
+
+            if ($this->allEggsFound($this->eggsFound)) {
+                $return = $this->finishedEggSearchStats();
+            } else {
+                $return = $this->eggFoundMessage();
+            }
         } else {
-            $this->eggsFound++;
-            $result = 'Du hast ein Ei gefunden';
+            $return = $this->noEggFoundHint($currentRow, $currentCol);
         }
 
-        if ($this->hasFoundAllEggs()) {
-            $result = 'Das Kind hat alle ' . $this->eggsFound . ' Eier in ' . $this->steps . ' Schritten gefunden.';
-        }
+        return $return;
+    }
 
-        return $result;
+
+    private function eggFound(int $row, int $column): bool
+    {
+        return $this->garden[$row][$column] === '*';
+    }
+
+    private function eggNearbyFound(int $row, int $column, int $rowDirection, int $columnDirection): bool
+    {
+        if ($this->fieldDoesNotExist($row + $rowDirection, $column + $columnDirection))
+            return false;
+        return $this->garden[$row + $rowDirection][$column + $columnDirection] === '*';
+    }
+
+
+    private function allEggsFound(int $eggsFound): bool
+    {
+        return $eggsFound === $this->eggsCount;
+    }
+
+
+    private function lookAroundAndCount(int $row, int $column): int
+    {
+        $eggsNearBy = 0;
+        for ($rowDirection = self::UP; $rowDirection <= self::DOWN; $rowDirection++) {
+            for ($columnDirection = self::LEFT; $columnDirection <= self::RIGHT; $columnDirection++) {
+                if ($this->eggNearbyFound($row, $column, $rowDirection, $columnDirection)) {
+                    $eggsNearBy++;
+                }
+            }
+        }
+        return $eggsNearBy;
+    }
+
+    private function fieldDoesNotExist(int $row, int $column): bool
+    {
+        if ($this->rowDoesNotExist($row)
+            || $this->columnDoesNotExist($row, $column))
+            return true;
+        return false;
+    }
+
+    private function rowDoesNotExist(int $row): bool
+    {
+        return !array_key_exists($row, $this->garden);
+    }
+
+    private function columnDoesNotExist(int $row, int $column): bool
+    {
+        return !array_key_exists($column, $this->garden[$row]);
     }
 
     /**
-     * @param int $currentRow
-     * @param int $currentCol
-     * @return bool
      * @throws NotInOurGardenException
      */
-    private function noEggFound(int $currentRow, int $currentCol): bool
+    private function validateUserInput(int $row, int $column): array
     {
-        if (!$this->isInGarden($currentRow, $currentCol)) {
-            throw new NotInOurGardenException('Du bist nicht mehr im Garten.');
+        $currentCol = $column - 1;
+        $currentRow = $row - 1;
+
+        if ($this->fieldDoesNotExist($currentRow, $currentCol)) {
+            throw new NotInOurGardenException('This is not in our garden.');
         }
 
-        return $this->garden[$currentRow][$currentCol] !== '*';
+        return array($currentCol, $currentRow);
     }
 
-    /**
-     * @param int $currentCol
-     * @param int $currentRow
-     * @param int $eggsFoundAround
-     * @return int
-     * @throws NotInOurGardenException
-     */
-    protected function lookAround(int $currentCol, int $currentRow, int $eggsFoundAround): int
-    {
-        // look right
-        if (array_key_exists($currentCol + 1, $this->garden[$currentRow]) && !$this->noEggFound(
-                $currentRow,
-                $currentCol + 1
-            )) {
-            ++$eggsFoundAround;
-        }
-        // look left
-        if (array_key_exists($currentCol - 1, $this->garden[$currentRow]) && !$this->noEggFound(
-                $currentRow,
-                $currentCol - 1
-            )) {
-            ++$eggsFoundAround;
-        }
-        // look bottom
-        if (array_key_exists($currentRow + 1, $this->garden) && !$this->noEggFound($currentRow + 1, $currentCol)) {
-            ++$eggsFoundAround;
-        }
-        //look up
-        if (array_key_exists($currentRow - 1, $this->garden) && !$this->noEggFound($currentRow - 1, $currentCol)) {
-            ++$eggsFoundAround;
-        }
-
-        return $eggsFoundAround;
-    }
-
-    /**
-     * @param int $currentRow
-     * @param int $currentCol
-     * @return bool
-     */
-    private function isInGarden(int $currentRow, int $currentCol): bool
-    {
-        return (array_key_exists($currentRow, $this->garden) && array_key_exists(
-                $currentCol,
-                $this->garden[$currentRow]
-            ));
-    }
-
-    /**
-     * @param string $filename
-     * @return false|string
-     */
-    private function hideEggsInGarden(string $filename)
-    {
-        $fileContent = file_get_contents('Resources/' . $filename);
-        foreach (explode(PHP_EOL, $fileContent) as $row) {
-            $this->garden[] = explode(' ', $row);
-        }
-        return $fileContent;
-    }
-
-    /**
-     * @param string $fileContent
-     */
-    private function countEggs(string $fileContent): void
-    {
-        $this->eggCount = substr_count($fileContent, '*');
-    }
-
-    /**
-     * @param int $row
-     * @return int
-     */
-    private function calibrateUserInput(int $row): int
-    {
-        return $row - 1;
-    }
-
-    private function incrementSteps(): void
+    private function countOneMoreStep(): void
     {
         $this->steps++;
     }
 
-    /**
-     * @return bool
-     */
-    private function hasFoundAllEggs(): bool
+    private function countOneMoreEggFound(): void
     {
-        return $this->eggsFound === $this->eggCount;
+        $this->eggsFound++;
+    }
+
+    /**
+     * @return string
+     */
+    private function finishedEggSearchStats(): string
+    {
+        return 'Das Kind hat alle ' . $this->eggsCount . ' Eier in ' . $this->steps . ' Schritten gefunden.';
+    }
+
+    /**
+     * @return string
+     */
+    private function eggFoundMessage(): string
+    {
+        return 'Du hast ein Ei gefunden.';
+    }
+
+    /**
+     * @param $currentRow
+     * @param $currentCol
+     * @return string
+     */
+    private function noEggFoundHint($currentRow, $currentCol): string
+    {
+        return 'Du hast ' . $this->lookAroundAndCount($currentRow, $currentCol) . ' Eier in Deiner Nähe.';
     }
 }
