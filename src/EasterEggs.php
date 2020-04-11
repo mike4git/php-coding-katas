@@ -35,7 +35,8 @@ class EasterEggs
      */
     public function whereAreEasterEggs(int $row, int $column): string
     {
-        list($currentCol, $currentRow) = $this->validateUserInput($row, $column);
+        list($currentCol, $currentRow) =
+            $this->validateUserInput($row, $column);
 
         $this->countOneMoreStep();
 
@@ -61,11 +62,21 @@ class EasterEggs
         return $this->garden[$row][$column] === '*';
     }
 
-    private function eggNearbyFound(int $row, int $column, int $rowDirection, int $columnDirection): bool
+    private function eggNearbyFound(
+        int $row, int $column,
+        int $rowDirection, int $columnDirection
+    ): bool
     {
-        if ($this->fieldDoesNotExist($row + $rowDirection, $column + $columnDirection))
+        if ($this->fieldDoesNotExist(
+            $row + $rowDirection,
+            $column + $columnDirection)
+        )
             return false;
-        return $this->garden[$row + $rowDirection][$column + $columnDirection] === '*';
+
+        return $this->eggFound(
+            $row + $rowDirection,
+            $column + $columnDirection
+        );
     }
 
 
@@ -78,9 +89,18 @@ class EasterEggs
     private function lookAroundAndCount(int $row, int $column): int
     {
         $eggsNearBy = 0;
-        for ($rowDirection = self::UP; $rowDirection <= self::DOWN; $rowDirection++) {
-            for ($columnDirection = self::LEFT; $columnDirection <= self::RIGHT; $columnDirection++) {
-                if ($this->eggNearbyFound($row, $column, $rowDirection, $columnDirection)) {
+        for ($rowDirection = self::UP;
+             $rowDirection <= self::DOWN;
+             $rowDirection++) {
+
+            for ($columnDirection = self::LEFT;
+                 $columnDirection <= self::RIGHT;
+                 $columnDirection++) {
+
+                if ($this->eggNearbyFound(
+                    $row, $column,
+                    $rowDirection, $columnDirection)
+                ) {
                     $eggsNearBy++;
                 }
             }
@@ -136,7 +156,11 @@ class EasterEggs
      */
     private function finishedEggSearchStats(): string
     {
-        return 'Das Kind hat alle ' . $this->eggsCount . ' Eier in ' . $this->steps . ' Schritten gefunden.';
+        return 'Das Kind hat alle ' .
+            $this->eggsCount .
+            ' Eier in ' .
+            $this->steps .
+            ' Schritten gefunden.';
     }
 
     /**
@@ -154,6 +178,8 @@ class EasterEggs
      */
     private function noEggFoundHint($currentRow, $currentCol): string
     {
-        return 'Du hast ' . $this->lookAroundAndCount($currentRow, $currentCol) . ' Eier in Deiner Nähe.';
+        return 'Du hast ' .
+            $this->lookAroundAndCount($currentRow, $currentCol) .
+            ' Eier in Deiner Nähe.';
     }
 }
