@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class EasterEggsTest extends TestCase
 {
+    const RESOURCES_FOLDER = 'Resources/eastereggs/';
 
     /**
      * @test
@@ -29,43 +30,43 @@ class EasterEggsTest extends TestCase
     {
         return [
             'Alle Eier gefunden:' => [
-                'Resources/single_egg.txt',
+                self::RESOURCES_FOLDER . 'single_egg.txt',
                 1, 1,
                 'Das Kind hat alle 1 Eier in 1 Schritten gefunden.'
             ],
 
             'Nicht alle Eier gefunden:' => [
-                'Resources/two_eggs.txt',
+                self::RESOURCES_FOLDER . 'two_eggs.txt',
                 1, 1,
                 'Du hast ein Ei gefunden.'
             ],
 
             'Ein Ei rechts:' => [
-                'Resources/one_egg_near_by.txt',
+                self::RESOURCES_FOLDER . 'one_egg_near_by.txt',
                 1, 1,
                 'Du hast 1 Eier in Deiner Nähe.'
             ],
 
             'Zwei Eier - links und rechts:' => [
-                'Resources/two_eggs_near_by.txt',
+                self::RESOURCES_FOLDER . 'two_eggs_near_by.txt',
                 1, 2,
                 'Du hast 2 Eier in Deiner Nähe.'
             ],
 
             'Ein Ei über mir:' => [
-                'Resources/one_egg_above.txt',
+                self::RESOURCES_FOLDER . 'one_egg_above.txt',
                 2, 1,
                 'Du hast 1 Eier in Deiner Nähe.'
             ],
 
             'Ein Ei schräg rechts und drunter:' => [
-                'Resources/multi_eggs_in_multi_rows.txt',
+                self::RESOURCES_FOLDER . 'multi_eggs_in_multi_rows.txt',
                 3, 1,
                 'Du hast 2 Eier in Deiner Nähe.'
             ],
 
             'Eier überall:' => [
-                'Resources/eggs_all_around.txt',
+                self::RESOURCES_FOLDER . 'eggs_all_around.txt',
                 2, 2,
                 'Du hast 8 Eier in Deiner Nähe.'
             ],
@@ -78,7 +79,7 @@ class EasterEggsTest extends TestCase
      */
     public function foundAllEggsAfterSeveralSteps()
     {
-        $easteregg = new EasterEggs('Resources/mikes_garden.txt');
+        $easteregg = new EasterEggs(self::RESOURCES_FOLDER . 'mikes_garden.txt');
         $easteregg->whereAreEasterEggs(1, 4);
         $easteregg->whereAreEasterEggs(2, 2);
         $easteregg->whereAreEasterEggs(4, 4);
@@ -95,7 +96,7 @@ class EasterEggsTest extends TestCase
      */
     public function outsideGarden(): void
     {
-        $easteregg = new EasterEggs('Resources/mikes_garden.txt');
+        $easteregg = new EasterEggs(self::RESOURCES_FOLDER . 'mikes_garden.txt');
         $this->expectException(NotInOurGardenException::class);
         $easteregg->whereAreEasterEggs(-1, 3);
     }
