@@ -1,76 +1,103 @@
 <?php declare(strict_types=1);
 
-namespace Kata\Tests;
+namespace Kata;
 
-use Kata\EasterEggs;
 use Kata\Exception\NotInOurGardenException;
 use PHPUnit\Framework\TestCase;
 
 class EasterEggsTest extends TestCase
 {
-    private $easterEgg;
-
-    public function dataProvider()
-    {
-        yield['single_egg.txt', 1, 1, 'Das Kind hat alle 1 Eier in 1 Schritten gefunden.'];
-        yield['pair_of_eggs.txt', 1, 1, 'Du hast ein Ei gefunden'];
-        yield['some_eggs_in_a_row.txt', 1, 1, 'Es sind 0 Eier in Deiner Nähe'];
-        yield['some_eggs_in_a_row.txt', 1, 2, 'Es sind 1 Eier in Deiner Nähe'];
-        yield['some_eggs_in_a_row.txt', 1, 4, 'Es sind 2 Eier in Deiner Nähe'];
-        yield['some_eggs_in_a_row.txt', 1, 6, 'Es sind 1 Eier in Deiner Nähe'];
-        yield['some_eggs_in_some_rows.txt', 1, 1, 'Es sind 2 Eier in Deiner Nähe'];
-        yield['some_eggs_in_some_rows.txt', 2, 2, 'Es sind 2 Eier in Deiner Nähe'];
-        yield['easter_eggs_1.txt', 4, 1, 'Es sind 0 Eier in Deiner Nähe'];
-    }
 
     /**
      * @test
-     * @param string $filename
-     * @param int    $row
-     * @param int    $column
-     * @param string $output
+     * @dataProvider createSampleGardens
      * @throws NotInOurGardenException
-     * @dataProvider dataProvider
      */
-    public function whereAreEasterEggsOneTimeCall(
+    public function whereAreEasterEggs(
         string $filename,
-        int $row,
-        int $column,
-        string $output
-    ): void {
-        $this->easterEgg = new EasterEggs($filename);
-        self::assertSame($output, $this->easterEgg->whereAreEasterEggs($row, $column));
-    }
-
-    /**
-     * @test
-     * @throws NotInOurGardenException
-     */
-    public function whereAreEasterEggsMultipleCalls(): void
+        int $row, int $col,
+        string $expectedResult
+    ): void
     {
-        $this->easterEgg = new EasterEggs('easter_eggs_1.txt');
-
-        $this->easterEgg->whereAreEasterEggs(1, 4);
-        $this->easterEgg->whereAreEasterEggs(2, 2);
-        $this->easterEgg->whereAreEasterEggs(4, 4);
-        $this->easterEgg->whereAreEasterEggs(3, 4);
-
-        self::assertSame(
-            'Das Kind hat alle 4 Eier in 5 Schritten gefunden.',
-            $this->easterEgg->whereAreEasterEggs(4, 5)
+        $easterEgg = new EasterEggs($filename);
+        self::assertSame($expectedResult,
+            $easterEgg->whereAreEasterEggs($row, $col)
         );
     }
 
+    public function createSampleGardens(): iterable
+    {
+        return [
+            'Alle Eier gefunden:' => [
+                'Resources/single_egg.txt',
+                1, 1,
+                'Das Kind hat alle 1 Eier in 1 Schritten gefunden.'
+            ],
+
+            'Nicht alle Eier gefunden:' => [
+                'Resources/two_eggs.txt',
+                1, 1,
+                'Du hast ein Ei gefunden.'
+            ],
+
+            'Ein Ei rechts:' => [
+                'Resources/one_egg_near_by.txt',
+                1, 1,
+                'Du hast 1 Eier in Deiner Nähe.'
+            ],
+
+            'Zwei Eier - links und rechts:' => [
+                'Resources/two_eggs_near_by.txt',
+                1, 2,
+                'Du hast 2 Eier in Deiner Nähe.'
+            ],
+
+            'Ein Ei über mir:' => [
+                'Resources/one_egg_above.txt',
+                2, 1,
+                'Du hast 1 Eier in Deiner Nähe.'
+            ],
+
+            'Ein Ei schräg rechts und drunter:' => [
+                'Resources/multi_eggs_in_multi_rows.txt',
+                3, 1,
+                'Du hast 2 Eier in Deiner Nähe.'
+            ],
+
+            'Eier überall:' => [
+                'Resources/eggs_all_around.txt',
+                2, 2,
+                'Du hast 8 Eier in Deiner Nähe.'
+            ],
+        ];
+    }
+
     /**
      * @test
      * @throws NotInOurGardenException
      */
-    public function whereAreEasterEggsSingleFailureCall(): void
+    public function foundAllEggsAfterSeveralSteps()
     {
-        $this->easterEgg = new EasterEggs('easter_eggs_1.txt');
+        $easteregg = new EasterEggs('Resources/mikes_garden.txt');
+        $easteregg->whereAreEasterEggs(1, 4);
+        $easteregg->whereAreEasterEggs(2, 2);
+        $easteregg->whereAreEasterEggs(4, 4);
+        self::assertSame(
+            'Das Kind hat alle 4 Eier in 4 Schritten gefunden.',
+            $easteregg->whereAreEasterEggs(4, 5)
+        );
 
-        $this->expectException(NotInOurGardenException::class);
-
-        $this->easterEgg->whereAreEasterEggs(7, 8);
     }
+
+    /**
+     * @test
+     * @throws NotInOurGardenException
+     */
+    public function outsideGarden(): void
+    {
+        $easteregg = new EasterEggs('Resources/mikes_garden.txt');
+        $this->expectException(NotInOurGardenException::class);
+        $easteregg->whereAreEasterEggs(-1, 3);
+    }
+
 }
