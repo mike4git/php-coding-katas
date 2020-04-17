@@ -1,0 +1,5 @@
+#/bin/bash
+
+APP_ROOT="$(dirname "$(dirname "$(readlink -fm "$0")")")"
+
+(cd "$APP_ROOT"; docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v "${APP_ROOT}:/app" -w "/app"  php:7.4 $@)

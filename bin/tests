@@ -1,0 +1,4 @@
+#/bin/bash
+
+BIN_DIR="$(dirname "$(readlink -fm "$0")")"
+/bin/bash "${BIN_DIR}/run" vendor/bin/phpunit $@
